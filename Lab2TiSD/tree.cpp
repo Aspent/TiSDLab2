@@ -1,5 +1,48 @@
 #include "tree.h"
 
+Queue::Queue()
+{
+	_begin = NULL;
+	_end = NULL;
+}
+
+void Queue::Enqueue(Node *element)
+{
+	QueueElement *queueElement;
+	queueElement = new QueueElement;
+	queueElement->data = element;
+	queueElement->next = NULL;
+
+	if (_begin == NULL)
+	{
+		_begin = queueElement;
+	}
+	else
+	{
+		_end->next = queueElement;
+	}
+	_end = queueElement;
+}
+
+void Queue::Dequeue()
+{
+	QueueElement *temp;
+	temp = _begin;
+	_begin = temp->next;
+	delete temp;
+}
+
+void Queue::Show()
+{
+	QueueElement *queueElement;
+	queueElement = _begin;
+	while (queueElement != NULL)
+	{
+		cout << queueElement->data->data << " ";
+		queueElement = queueElement->next;
+	}
+}
+
 BinaryTree::BinaryTree()
 {
 	_root = NULL;
@@ -38,6 +81,26 @@ void BinaryTree::InOrderWalk(Node *root)
 		cout << root->data << " ";
 		InOrderWalk(root->right);
 	}
+}
+
+void BinaryTree::Print(Node *root, int spacesCount)
+{
+	if (root != NULL)
+	{
+		Print(root->right, spacesCount + 2);
+		for (int i = 0; i < spacesCount; i++)
+		{
+			cout << " ";
+		}
+		cout << root->data << endl;
+		Print(root->left, spacesCount + 2);
+	}
+}
+
+
+
+void BinaryTree::PrintByLevel(Node *root)
+{
 
 }
 
