@@ -14,13 +14,15 @@ struct Node
 class BinaryTree
 {
 private:
-	Node *root;
+	Node *_root;
 public:
 	BinaryTree();
+	BinaryTree(ifstream &inputFile, int elementsCount);
 	Node* CreateBinaryTree(ifstream& inputFile, int elementsCount);
 	void DeleteElement(char element);
-	void InOrderWalk();
+	void InOrderWalk(Node *root);
 	void PrintByLevel();
+	Node* GetRoot();
 };
 
 #endif

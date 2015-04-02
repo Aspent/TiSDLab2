@@ -2,7 +2,12 @@
 
 BinaryTree::BinaryTree()
 {
-	root = NULL;
+	_root = NULL;
+}
+
+BinaryTree::BinaryTree(ifstream &inputFile, int elementsCount)
+{
+	_root = CreateBinaryTree(inputFile, elementsCount);
 }
 
 Node *BinaryTree::CreateBinaryTree(ifstream &inputFile, int elementsCount)
@@ -23,4 +28,20 @@ Node *BinaryTree::CreateBinaryTree(ifstream &inputFile, int elementsCount)
 		node = NULL;
 	}
 	return node;
+}
+
+void BinaryTree::InOrderWalk(Node *root)
+{
+	if (root != NULL)
+	{
+		InOrderWalk(root->left);
+		cout << root->data << " ";
+		InOrderWalk(root->right);
+	}
+
+}
+
+Node* BinaryTree::GetRoot()
+{
+	return _root;
 }
