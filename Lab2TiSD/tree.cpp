@@ -32,15 +32,18 @@ void Queue::Dequeue()
 	delete temp;
 }
 
-void Queue::Show()
+bool Queue::isEmpty()
 {
-	QueueElement *queueElement;
-	queueElement = _begin;
-	while (queueElement != NULL)
+	if (_begin == NULL)
 	{
-		cout << queueElement->data->data << " ";
-		queueElement = queueElement->next;
+		return true;
 	}
+	return false;
+}
+
+Node* Queue::GetTop()
+{
+	return _begin->data;
 }
 
 BinaryTree::BinaryTree()
@@ -97,11 +100,23 @@ void BinaryTree::Print(Node *root, int spacesCount)
 	}
 }
 
-
-
 void BinaryTree::PrintByLevel(Node *root)
 {
-
+	Queue queue;
+	queue.Enqueue(root);
+	while (!queue.isEmpty())
+	{
+		if (queue.GetTop()->left != NULL)
+		{
+			queue.Enqueue(queue.GetTop()->left);
+		}
+		if (queue.GetTop()->right != NULL)
+		{
+			queue.Enqueue(queue.GetTop()->right);
+		}
+		cout << queue.GetTop()->data << " ";
+		queue.Dequeue();
+	}
 }
 
 Node* BinaryTree::GetRoot()

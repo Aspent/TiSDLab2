@@ -25,7 +25,8 @@ public:
 	Queue();
 	void Enqueue(Node *element);
 	void Dequeue();
-	void Show();
+	bool isEmpty();
+	Node* GetTop();
 };
 
 class BinaryTree
