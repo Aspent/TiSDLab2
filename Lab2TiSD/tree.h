@@ -60,6 +60,7 @@ public:
 	Node* GetRoot();
 	string GetName();
 	virtual Node* Find(char data);
+	bool IsEmpty();
 };
 
 class BinarySearchTree : public BinaryTree
@@ -91,4 +92,12 @@ public:
 	void Fill(ofstream &inputFile);
 };
 
+class FileWriter
+{
+public:
+	void WriteTree(ofstream &outFile, Node *root, int spacesCount);
+
+	void WriteByLevelOrder(ofstream &outFile, Node *root);
+
+};
 #endif

@@ -1,6 +1,9 @@
 #include "tree.h"
 #include <string>
 
+
+
+
 Queue::Queue()
 {
 	_begin = NULL;
@@ -62,7 +65,6 @@ Node *BinaryTree::CreateBinaryTree(ifstream &inputFile, int elementsCount)
 	int leftTreeLength, rightTreeLength;
 	Node *node;
 	Node *parent;
-	//parent = new Node;
 	if (elementsCount > 0)
 	{
 		leftTreeLength = elementsCount / 2;
@@ -82,8 +84,6 @@ Node *BinaryTree::CreateBinaryTree(ifstream &inputFile, int elementsCount)
 		{
 			node->right->parent = parent;
 		}
-		
-
 	}
 	else
 	{
@@ -94,36 +94,53 @@ Node *BinaryTree::CreateBinaryTree(ifstream &inputFile, int elementsCount)
 
 void BinaryTree::PreOrderWalk(Node *root)
 {
+	if (IsEmpty())
+	{
+		throw runtime_error("Error in preorder walk: List is empty");
+	}	
 	if (root != NULL)
 	{
 		cout << root->data << " ";
 		PreOrderWalk(root->left);
-		InOrderWalk(root->right);
+		PreOrderWalk(root->right);
 	}
 }
 
 void BinaryTree::InOrderWalk(Node *root)
 {
+	if (IsEmpty())
+	{
+		throw runtime_error("Error in inorder walk: List is empty");
+	}
 	if (root != NULL)
 	{
 		InOrderWalk(root->left);
 		cout << root->data << " ";
 		InOrderWalk(root->right);
 	}
+
 }
 
 void BinaryTree::PostOrderWalk(Node *root)
 {
+	if (IsEmpty())
+	{
+		throw runtime_error("Error in postorder walk: List is empty");
+	}
 	if (root != NULL)
 	{
-		PreOrderWalk(root->left);
-		InOrderWalk(root->right);
+		PostOrderWalk(root->left);
+		PostOrderWalk(root->right);
 		cout << root->data << " ";
 	}
 }
 
 void BinaryTree::Print(Node *root, int spacesCount)
 {
+	if (IsEmpty())
+	{
+		throw runtime_error("Error in printing: List is empty");
+	}
 	if (root != NULL)
 	{
 		Print(root->right, spacesCount + 2);
@@ -138,6 +155,10 @@ void BinaryTree::Print(Node *root, int spacesCount)
 
 void BinaryTree::PrintByLevel(Node *root)
 {
+	if (IsEmpty())
+	{
+		throw runtime_error("Error in by-level walk: List is empty");
+	}
 	Queue queue;
 	queue.Enqueue(root);
 	while (!queue.isEmpty())
@@ -167,6 +188,8 @@ string BinaryTree::GetName()
 
 Node* BinaryTree::Find(char data)
 {
+	Node *noNode;
+	noNode->data = '\0';
 	Queue queue;
 	queue.Enqueue(_root);
 	while (!queue.isEmpty())
@@ -185,7 +208,7 @@ Node* BinaryTree::Find(char data)
 		}
 		queue.Dequeue();
 	}
-	return NULL;
+	return noNode;
 }
 
 void BinaryTree::DeleteElementWithoutChildren(Node *node)
@@ -263,14 +286,21 @@ void BinaryTree::DeleteElementWithTwoChildren(Node *node)
 	}
 	if (_root != node)
 	{
-		
-		temp->parent->left = temp->right;
-		temp->parent = node->parent;
-		temp->left = node->left;
-		temp->right = node->right;
-
-		node->right->parent = temp;
-		node->left->parent = temp;
+		if (temp->parent != node)
+		{
+			temp->parent->left = temp->right;
+			temp->parent = node->parent; 
+			temp->left = node->left; 
+			temp->right = node->right;
+			node->right->parent = temp;
+			node->left->parent = temp;
+		}
+		else
+		{
+			temp->left = node->left;
+			node->left->parent = temp;
+			temp->parent = node->parent;	
+		}
 		
 		if (node->parent->left == node)
 		{
@@ -283,23 +313,34 @@ void BinaryTree::DeleteElementWithTwoChildren(Node *node)
 	}
 	else
 	{
-		temp->parent->left = temp->right;
 		temp->left = node->left;
-		temp->right = node->right;
-
-		node->right->parent = temp;
+		if (temp->parent != node)
+		{
+			temp->parent->left = temp->right;
+			temp->right = node->right;
+			node->right->parent = temp;
+		}
 		node->left->parent = temp;
 		temp->parent = NULL;
 		_root = temp;
-
 	}
+
 	delete node;
 }
 
 void BinaryTree::DeleteElement(char element)
 {
+	if (IsEmpty())
+	{
+		throw runtime_error("Error: can't delete element from empty tree");
+	}
+	
 	Node* node;
 	node = Find(element);
+	if (node == NULL)
+	{
+		return;
+	}
 
 	if (node->left == NULL && node->right == NULL)
 	{
@@ -319,6 +360,15 @@ void BinaryTree::DeleteElement(char element)
 	}
 }
 
+bool BinaryTree::IsEmpty()
+{
+	if (_root == NULL)
+	{
+		return true;
+	}
+	return false;
+}
+
 BinarySearchTree::BinarySearchTree()
 {
 	_root = NULL;
@@ -332,15 +382,27 @@ BinarySearchTree::BinarySearchTree(string name)
 
 Node* BinarySearchTree::Find(char data)
 {
+	if (IsEmpty())
+	{
+		throw runtime_error("Error: can't find element in empty tree");
+	}
 	Node *node = _root;
 	while (node != NULL)
 	{
 		if (data < node->data)
 		{
+			if (node->left == NULL)
+			{
+				break;
+			}
 			node = node->left;
 		}
 		if (data > node->data)
 		{
+			if (node->right == NULL)
+			{
+				break;
+			}
 			node = node->right;
 		}
 		if (data == node->data)
@@ -429,7 +491,8 @@ Comand EventCreater::GetComand()
 void EventHandler::Handle(Comand comand, BinarySearchTree trees[], int &numOfList, int &numOfLastList, ifstream &inputFile, ofstream &outputFile, ofstream &errorFile)
 {
 	int count;
-	char ch;
+	char ch, ch1;
+	string str;
 	switch (comand.comandNumber)
 	{
 	case 0:
@@ -437,13 +500,20 @@ void EventHandler::Handle(Comand comand, BinarySearchTree trees[], int &numOfLis
 	case 1:
 	{
 			  BinaryTree tree(inputFile, 26);
+			  FileWriter fileWriter;
 
-			  tree.Print(tree.GetRoot(), 1);
-			  cout << endl;
-			  tree.InOrderWalk(tree.GetRoot());
-			  cout << endl;
+			  outputFile << "Tree with symbols" << '\n';
+			  cout << "Tree with symbols" << '\n';
+			  tree.Print(tree.GetRoot(), 1);			
+			  fileWriter.WriteTree(outputFile, tree.GetRoot(), 1);
+			  outputFile << '\n';
+
+			  outputFile << "By-level walk" << '\n';
+			  cout << "By-level walk" << '\n';
 			  tree.PrintByLevel(tree.GetRoot());
+			  fileWriter.WriteByLevelOrder(outputFile, tree.GetRoot());
 			  cout << endl;
+			  outputFile << '\n';
 
 			  tree.DeleteElement('A');
 			  tree.DeleteElement('E');
@@ -451,12 +521,17 @@ void EventHandler::Handle(Comand comand, BinarySearchTree trees[], int &numOfLis
 			  tree.DeleteElement('I');
 			  tree.DeleteElement('U');
 
+			  outputFile << "Tree after deleting of vowels" << '\n';
+			  cout << "Tree after deleting of vowels" << '\n';
 			  tree.Print(tree.GetRoot(), 1);
-			  cout << endl;
-			  tree.InOrderWalk(tree.GetRoot());
-			  cout << endl;
+			  fileWriter.WriteTree(outputFile, tree.GetRoot(), 1);
+			  outputFile << '\n';
+
+			  outputFile << "By-level walk" << '\n';
+			  cout << "By-level walk" << '\n';
 			  tree.PrintByLevel(tree.GetRoot());
-			  cout << endl;
+			  fileWriter.WriteByLevelOrder(outputFile, tree.GetRoot());
+			  outputFile << '\n';
 
 	}
 		break;
@@ -468,9 +543,7 @@ void EventHandler::Handle(Comand comand, BinarySearchTree trees[], int &numOfLis
 			cout << "Input char element you want to insert" << endl;
 			char elementValue;
 			cin >> elementValue;
-
-			int position;
-			cin >> position;
+			
 			trees[numOfList].InsertNode(elementValue);
 		}
 		break;
@@ -486,9 +559,10 @@ void EventHandler::Handle(Comand comand, BinarySearchTree trees[], int &numOfLis
 			{
 				trees[numOfList].DeleteElement(element);
 			}
-			catch (invalid_argument& error)
+			catch (runtime_error& error)
 			{
-				errorFile << "Wrong position to delete" << '\n';
+				errorFile << "Error: can't delete element in empty tree" << '\n';
+				cout << "Error: can't delete element in empty tree" << endl;
 			}
 		}
 		break;
@@ -499,25 +573,74 @@ void EventHandler::Handle(Comand comand, BinarySearchTree trees[], int &numOfLis
 		cout << "Press 4 to print by levels" << endl << endl;
 
 
-		cin >> ch;
+		cin >> str;
+		if (str.length() != 1)
+		{
+			ch1 = 'e';
+		}
+		else
+		{
+			ch1 = str[0];
+		}
 
-		switch (ch)
+		switch (ch1)
 		{
 		case '1':
-			trees[numOfList].PreOrderWalk(trees[numOfList].GetRoot());
+			try
+			{
+				trees[numOfList].PreOrderWalk(trees[numOfList].GetRoot());
+			}
+			catch (runtime_error& error)
+			{
+				errorFile << "Error in preorder walk: tree is empty" << '\n';
+				cout << "Error in preorder walk: tree is empty" << endl;
+			}
 			break;
 		case '2':
-			trees[numOfList].InOrderWalk(trees[numOfList].GetRoot());
+			try
+			{
+				trees[numOfList].InOrderWalk(trees[numOfList].GetRoot());
+			}
+			catch (runtime_error& error)
+			{
+				errorFile << "Error in inorder walk: tree is empty" << '\n';
+				cout << "Error in inorder walk: tree is empty" << endl;
+			} 		
 			break;
 		case '3':
-			trees[numOfList].PostOrderWalk(trees[numOfList].GetRoot());
+			try
+			{
+				trees[numOfList].PostOrderWalk(trees[numOfList].GetRoot());
+			}
+			catch (runtime_error& error)
+			{
+				errorFile << "Error in postorder walk: tree is empty" << '\n';
+				cout << "Error in postorder walk: tree is empty" << endl;
+			}
 			break;
 		case '4':
-			trees[numOfList].PrintByLevel(trees[numOfList].GetRoot());
+			try
+			{
+				trees[numOfList].PrintByLevel(trees[numOfList].GetRoot());
+			}
+			catch (runtime_error& error)
+			{
+				errorFile << "Error in by-level walk: tree is empty" << '\n';
+				cout << "Error in by-level walk: tree is empty" << endl;
+			}
 			break;
 		}
+		break;
 	case 5:
-		trees[numOfList].Print(trees[numOfList].GetRoot(), 1);
+		try
+		{
+			trees[numOfList].Print(trees[numOfList].GetRoot(), 1);
+		}
+		catch (runtime_error& error)
+		{
+			errorFile << "Error in printing: tree is empty" << '\n';
+			cout << "Error in printing: tree is empty" << endl;
+		}
 		break;
 	case 6:
 		try
@@ -598,3 +721,37 @@ void FileFiller::Fill(ofstream &inputFile)
 	}
 }
 
+
+void FileWriter::WriteTree(ofstream &outFile, Node *root, int spacesCount)
+{
+	if (root != NULL)
+	{
+		WriteTree(outFile, root->right, spacesCount + 2);
+		for (int i = 0; i < spacesCount; i++)
+		{
+			outFile << " ";
+		}
+		outFile << root->data << endl;
+		WriteTree(outFile, root->left, spacesCount + 2);
+	}
+
+}
+
+void FileWriter::WriteByLevelOrder(ofstream &outFile, Node *root)
+{
+	Queue queue;
+	queue.Enqueue(root);
+	while (!queue.isEmpty())
+	{
+		if (queue.GetTop()->left != NULL)
+		{
+			queue.Enqueue(queue.GetTop()->left);
+		}
+		if (queue.GetTop()->right != NULL)
+		{
+			queue.Enqueue(queue.GetTop()->right);
+		}
+		outFile << queue.GetTop()->data << " ";
+		queue.Dequeue();
+	}
+}
